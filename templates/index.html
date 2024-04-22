@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sand settling calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='mu.png') }}" alt="MU Logo" style="max-width:75px; max-height:75px;">
+    <img src="{{ url_for('static', filename='EFDL_logo_black.png') }}" alt="EFDL Logo" style="max-width:75px; max-height:75px;">
+    <h1>Sand settling calculator</h1>
+
+    <p>This online calculator computes the terminal settling velocity of sand particles in quiescent water. It solves the drag law equation through iterations using the drag coefficient calculated based on Cheng (1997). It is used in our sedimentation model in predicting the locations where sediment cloud interacts with the streambed that may affect mussel habitat in construction related projects. </p>
+
+    <p><strong>References:</strong><br>
+    Cheng, N.-S., 1997: Simplified settling velocity formula for sediment particle. Journal of Hydraulic Engineering, 123, no. 2, 149–152, doi:10.1061/(ASCE)0733-9429(1997)123:2(149).<br>
+    Wang et al., 2024: A model for evaluation of sediment exposure and burial for freshwater mussels from heavy particle sedimentation. Ecological Modelling, in review. </p>
+
+    <form action="/calculate" method="post">
+        <fieldset>
+            <legend><strong>Sand Parameters</strong></legend>
+            <label for="min_diameter">Minimum Particle Diameter (mm):</label><br>
+            <input type="number" id="min_diameter" name="min_diameter" value="{{ min_diameter | default(10) }}"><br>
+            <label for="max_diameter">Maximum Particle Diameter (mm):</label><br>
+            <input type="number" id="max_diameter" name="max_diameter" value="{{ max_diameter | default(100) }}"><br>
+            <label for="diameter_interval">Diameter Interval (mm):</label><br>
+            <input type="number" id="diameter_interval" name="diameter_interval" value="{{ diameter_interval | default(10) }}"><br>
+            <label for="particle_density">Particle Density (kg/m^3):</label><br>
+            <input type="number" id="particle_density" name="particle_density" value="{{ particle_density | default(2650) }}"><br><br>
+        </fieldset>
+
+        <fieldset>
+            <legend><strong>Water Parameters</strong></legend>
+            <label for="temperature">Temperature (°C):</label><br>
+            <input type="number" id="temperature" name="temperature" value="{{ temperature | default(22) }}"><br>
+            <label for="salinity">Salinity (psu):</label><br>
+            <input type="number" id="salinity" name="salinity" value="{{ salinity | default(0) }}"><br>
+            <label for="pH">pH:</label><br>
+            <input type="number" id="pH" name="pH" value="{{ pH | default(8.0) }}"><br><br>
+        </fieldset>
+
+        <input type="submit" value="Calculate">
+    </form>
+
+    {% if diameters is defined and settling_velocities is defined and plot_url is defined %}
+        <h2>Settling Velocity vs Particle Diameter:</h2>
+        <img src="data:image/png;base64,{{ plot_url }}" alt="Settling Velocity vs Particle Diameter">
+        <table>
+            <tr>
+                <th>Particle Diameter (mm)</th>
+                <th>Settling Velocity (m/s)</th>
+            </tr>
+            {% for i in range(diameters | length) %}
+            <tr>
+                <td>{{ diameters[i] }}</td>
+                <td>{{ settling_velocities[i] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
